@@ -8,6 +8,8 @@ import Questions from "./components/Questions";
 import NextBtn from "./components/NextBtn";
 import Progress from "./components/Progress";
 import FinishScreen from "./components/FinishScreen";
+import Footer from "./components/Footer";
+import Timer from "./components/Timer";
 
 const initialState = {
   questions: [],
@@ -16,6 +18,7 @@ const initialState = {
   index: 0,
   answer: null,
   points: 0,
+  timeRemaining: 900,
 };
 function reducer(state, action) {
   switch (action.type) {
@@ -41,6 +44,12 @@ function reducer(state, action) {
       return { ...state, status: "finished" };
     case "restart":
       return { ...initialState, questions: state.questions, status: "ready" };
+    case "tick":
+      return {
+        ...state,
+        timeRemaining: state.timeRemaining - 1,
+        status: state.timeRemaining === 0 ? "finished" : state.status,
+      };
     default:
       throw new Error("unkown");
   }
@@ -48,7 +57,7 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status, index, answer, points } = state;
+  const { questions, status, index, answer, points, timeRemaining } = state;
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce(
     (prev, cur) => prev + cur.points,
@@ -84,12 +93,15 @@ export default function App() {
               dispatch={dispatch}
               answer={answer}
             />
-            <NextBtn
-              dispatch={dispatch}
-              answer={answer}
-              index={index}
-              numQuestions={numQuestions}
-            />
+            <Footer>
+              <Timer timeRemaining={timeRemaining} dispatch={dispatch} />
+              <NextBtn
+                dispatch={dispatch}
+                answer={answer}
+                index={index}
+                numQuestions={numQuestions}
+              />
+            </Footer>
           </>
         )}
         {status === "finished" && (
